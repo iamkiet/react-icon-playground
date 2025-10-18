@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import "./App.css";
 import {
@@ -16,6 +16,9 @@ export default function App() {
     x: 0,
     y: 0,
   });
+  const [idleTime, setIdleTime] = useState<number>(0);
+  const idleTimerRef = useRef<number | null>(null);
+  const lastMouseMoveRef = useRef<number>(Date.now());
 
   const handleReactIconClick = (): void => {
     setRotationDirection((prevDirection) => -prevDirection);
@@ -23,6 +26,7 @@ export default function App() {
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>): void => {
     setCursorPosition({ x: e.clientX, y: e.clientY });
+    lastMouseMoveRef.current = Date.now();
   };
 
   const getAnimationDirection = (): string => {
@@ -48,6 +52,23 @@ export default function App() {
     return `${size}px`;
   };
 
+  useEffect(() => {
+    const updateIdleTime = (): void => {
+      const now = Date.now();
+      const timeSinceLastMove = now - lastMouseMoveRef.current;
+      setIdleTime(timeSinceLastMove / 1000);
+    };
+
+    idleTimerRef.current = setInterval(updateIdleTime, 100);
+
+    return () => {
+      if (idleTimerRef.current) {
+        clearInterval(idleTimerRef.current);
+        idleTimerRef.current = null;
+      }
+    };
+  }, []);
+
   return (
     <div className="app" onMouseMove={handleMouseMove}>
       <div className="react-logo-container">
@@ -61,6 +82,9 @@ export default function App() {
             animationDirection: getAnimationDirection(),
           }}
         />
+      </div>
+      <div className="info-banner-container">
+        <p>Mouse idle time: {idleTime.toFixed(1)}s</p>
       </div>
     </div>
   );

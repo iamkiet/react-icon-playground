@@ -10,6 +10,6 @@ export const ANIMATION_DIRECTIONS = {
 
 export const ICON_SIZES = {
   MIN: 150,
-  MAX: 300,
+  MAX: 350,
   DEFAULT: 250,
 } as const;
