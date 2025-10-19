@@ -3,10 +3,10 @@ import reactLogo from "./assets/react.svg";
 import "./App.css";
 import {
   ANIMATION_DIRECTIONS,
-  ICON_SIZES,
   ROTATION_DIRECTIONS,
 } from "./constants";
 import type { CursorPosition } from "./types";
+import { getReactIconSize } from "./utils/getReactIconSize";
 
 export default function App() {
   const [rotationDirection, setRotationDirection] = useState<number>(
@@ -17,7 +17,7 @@ export default function App() {
     y: window.innerHeight / 2,
   });
   const [idleTime, setIdleTime] = useState<number>(0);
-  const idleTimerRef = useRef<number | null>(null);
+  const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastMouseMoveRef = useRef<number>(Date.now());
 
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
@@ -52,25 +52,8 @@ export default function App() {
       : ANIMATION_DIRECTIONS.REVERSE;
   };
 
-  const getReactIconSize = (): number => {
-    if (!isCursorSizingEnabled) {
-      return ICON_SIZES.DEFAULT;
-    }
-
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
-
-    const distance = Math.sqrt(
-      Math.pow(cursorPosition.x, 2) + Math.pow(cursorPosition.y, 2)
-    );
-    const maxDistance = Math.sqrt(
-      Math.pow(windowWidth, 2) + Math.pow(windowHeight, 2)
-    );
-
-    const sizeRatio = distance / maxDistance;
-    const size = ICON_SIZES.MIN + sizeRatio * (ICON_SIZES.MAX - ICON_SIZES.MIN);
-
-    return size;
+  const getReactIconSizeValue = (): number => {
+    return getReactIconSize(isCursorSizingEnabled, cursorPosition);
   };
 
   useEffect(() => {
@@ -110,7 +93,7 @@ export default function App() {
         document.removeEventListener('mousemove', handleGlobalMouseMove);
       };
     }
-  }, [isIdleCounterEnabled]);
+  }, [isIdleCounterEnabled, handleGlobalMouseMove]);
 
   return (
     <div className="app" onMouseMove={handleMouseMove}>
@@ -207,7 +190,7 @@ export default function App() {
           alt="React Logo"
           onClick={handleReactIconClick}
           style={{
-            height: `${getReactIconSize()}px`,
+            height: `${getReactIconSizeValue()}px`,
             animationDirection: getAnimationDirection(),
           }}
         />
@@ -216,7 +199,7 @@ export default function App() {
       <div className="info-banner">
         <div className="info-item">
           <span className={`info-text ${isCursorSizingEnabled ? "active" : "inactive"}`}>
-            Cursor Sizing: {isCursorSizingEnabled ? `${getReactIconSize().toFixed(1)}px` : "Disabled"}
+            Cursor Sizing: {isCursorSizingEnabled ? `${getReactIconSizeValue().toFixed(1)}px` : "Disabled"}
           </span>
         </div>
         <div className="info-item">
