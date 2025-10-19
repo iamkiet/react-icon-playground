@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import "./App.css";
 import {
@@ -39,12 +39,13 @@ export default function App() {
     }
   };
 
-  const handleGlobalMouseMove = (): void => {
+  const handleGlobalMouseMove = useCallback((e: MouseEvent): void => {
+    setCursorPosition({ x: e.clientX, y: e.clientY });
     lastMouseMoveRef.current = Date.now();
     if (isIdleCounterEnabled) {
       setIdleTime(0);
     }
-  };
+  }, [isIdleCounterEnabled]);
 
   const getAnimationDirection = (): string => {
     return rotationDirection === ROTATION_DIRECTIONS.CLOCKWISE
@@ -94,6 +95,18 @@ export default function App() {
       };
     }
   }, [isIdleCounterEnabled, handleGlobalMouseMove]);
+
+  useEffect(() => {
+    const handleMouseMoveForSizing = (e: MouseEvent) => {
+      setCursorPosition({ x: e.clientX, y: e.clientY });
+    };
+
+    document.addEventListener('mousemove', handleMouseMoveForSizing);
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMoveForSizing);
+    };
+  }, []);
 
   return (
     <div className="app" onMouseMove={handleMouseMove}>

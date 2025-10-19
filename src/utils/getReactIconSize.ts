@@ -1,5 +1,5 @@
-import { ICON_SIZES } from '../constants';
-import type { CursorPosition } from '../types';
+import { ICON_SIZES } from "../constants";
+import type { CursorPosition } from "../types";
 
 export const getReactIconSize = (
   isCursorSizingEnabled: boolean,
@@ -18,7 +18,7 @@ export const getReactIconSize = (
     Math.pow(windowWidth, 2) + Math.pow(windowHeight, 2)
   );
 
-  const sizeRatio = distance / maxDistance;
+  const sizeRatio = Math.min(distance / maxDistance, 1);
   const size = ICON_SIZES.MIN + sizeRatio * (ICON_SIZES.MAX - ICON_SIZES.MIN);
 
   return size;
